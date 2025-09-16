@@ -32,7 +32,7 @@ async def update_hotels(
 
 
 @app.patch('/hotels/{hotel_id}', status_code=status.HTTP_200_OK)
-async def update_hotels(
+async def update_hotel(
         hotel_id: int,
         hotel_title: Annotated[str, Body(..., embed=True)],
 ) -> dict:
