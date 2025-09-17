@@ -1,47 +1,25 @@
-from typing import Annotated
-from fastapi import status, Body, HTTPException, APIRouter
+from fastapi import status, APIRouter, Query
+from shemas.hotels import HotelRead
 
+router = APIRouter(prefix='/hotels', tags=['Hotels'])
 
-router = APIRouter(prefix='/hotels', tags=['hotels'])
-
-hotels = [
-    {'id': 1, 'title': 'A', 'name': 'A'},
-    {'id': 2, 'title': 'B', 'name': 'B'},
+hotels: list[HotelRead] = [
+    HotelRead(id=1, title='A', location='A'),
+    HotelRead(id=2, title='B', location='B'),
+    HotelRead(id=3, title='C', location='C'),
+    HotelRead(id=4, title='D', location='D'),
+    HotelRead(id=5, title='E', location='E'),
 ]
 
 
-@router.get('/', status_code=status.HTTP_200_OK)
-async def read_hotels() -> list:
-    return hotels
+@router.get('/', response_model=list[HotelRead], status_code=status.HTTP_200_OK)
+async def read_hotels(
+        page: int | None = Query(default=1, ge=1),
+        per_page: int | None = Query(default=10, ge=1, le=100)
+) -> list[HotelRead]:
+    if page is None or per_page is None:
+        return hotels
 
-
-@router.put('/{hotel_id}', status_code=status.HTTP_200_OK)
-async def update_hotels(
-        hotel_id: int,
-        hotel_title: Annotated[str, Body(..., embed=True)],
-        hotel_name: Annotated[str, Body(..., embed=True)],
-) -> dict:
-    hotel = next((h for h in hotels if h['id'] == hotel_id), None)
-
-    if not hotel:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail='Hotel not found')
-
-    hotel['title'] = hotel_title
-    hotel['name'] = hotel_name
-
-    return {'status': 'ok'}
-
-
-@router.patch('/{hotel_id}', status_code=status.HTTP_200_OK)
-async def update_hotel(
-        hotel_id: int,
-        hotel_title: Annotated[str, Body(..., embed=True)],
-) -> dict:
-    hotel = next((h for h in hotels if h['id'] == hotel_id), None)
-
-    if not hotel:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail='Hotel not found')
-
-    hotel['title'] = hotel_title
-
-    return {'status': 'ok'}
+    start = (page - 1) * per_page
+    end = start + per_page
+    return hotels[start:end]
