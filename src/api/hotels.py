@@ -1,5 +1,5 @@
 from fastapi import status, APIRouter, Query
-from shemas.hotels import HotelRead
+from src.shemas.hotels import HotelRead
 
 router = APIRouter(prefix='/hotels', tags=['Hotels'])
 
@@ -14,8 +14,8 @@ hotels: list[HotelRead] = [
 
 @router.get('/', response_model=list[HotelRead], status_code=status.HTTP_200_OK)
 async def read_hotels(
-        page: int | None = Query(default=1, ge=1),
-        per_page: int | None = Query(default=10, ge=1, le=100)
+        page: int | None = Query(None, ge=1),
+        per_page: int | None = Query(None, ge=1, le=100)
 ) -> list[HotelRead]:
     if page is None or per_page is None:
         return hotels
